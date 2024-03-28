@@ -28,6 +28,12 @@ pub enum BrewStakingError {
     #[msg("Amount to withdraw too high")]
     UnstakeAmountTooHigh,
 
+    #[msg("Insufficient deploy fee for deployer")]
+    InsufficientDeployFee,
+
+    #[msg("Insufficient performance fee for user")]
+    InsufficientPerformanceFee,
+
     ////////////
     #[msg("Wrong reserve owner. Must be a system account")]
     WrongReserveOwner, // 6000 0x1770
@@ -38,29 +44,11 @@ pub enum BrewStakingError {
     #[msg("Invalid initial reserve lamports")]
     InvalidInitialReserveLamports, // 6002 0x1772
 
-    #[msg("Zero validator chunk size")]
-    ZeroValidatorChunkSize, // 6003 0x1773
-
-    #[msg("Too big validator chunk size")]
-    TooBigValidatorChunkSize, // 6004 0x1774
-
-    #[msg("Zero credit chunk size")]
-    ZeroCreditChunkSize, // 6005 0x1775
-
-    #[msg("Too big credit chunk size")]
-    TooBigCreditChunkSize, // 6006 0x1776
-
-    #[msg("Too low credit fee")]
-    TooLowCreditFee, // 6007 0x1777
-
     #[msg("Invalid mint authority")]
     InvalidMintAuthority, // 6008 0x1778
 
     #[msg("Non empty initial mint supply")]
     MintHasInitialSupply, // 6009 0x1779
-
-    #[msg("Invalid owner fee state")]
-    InvalidOwnerFeeState, // 6010 0x177a
 
     #[msg(
         "Invalid program id. For using program from another account please update id in the code"
@@ -70,20 +58,11 @@ pub enum BrewStakingError {
     #[msg("Unexpected account")]
     UnexpectedAccount, // 6012 0x177c
 
-    #[msg("Calculation failure")]
-    CalculationFailure, // 6013 0x177d
-
-    #[msg("You can't deposit a stake-account with lockup")]
-    StakeAccountWithLockup, // 6014 0x177e
-
     #[msg("Min stake is too low")]
     MinStakeIsTooLow, // 6015 0x177f
 
     #[msg("Lp max fee is too high")]
     LpMaxFeeIsTooHigh, // 6016 0x1780
-
-    #[msg("Basis points overflow")]
-    BasisPointsOverflow, // 6017 0x1781
 
     #[msg("LP min fee > LP max fee")]
     LpFeesAreWrongWayRound, // 6018 0x1782
@@ -292,7 +271,4 @@ pub enum BrewStakingError {
     /// when the remainder after a withdraw stake account is less than min_stake
     #[msg("Stake account remainder too low")]
     StakeAccountRemainderTooLow, // 6085 0x17c5
-
-    #[msg("Capacity of the list must be not less than it's current size")]
-    ShrinkingListWithDeletingContents, // 6086 0x17c6
 }

@@ -8,7 +8,7 @@ mod utils;
 mod error;
 mod events;
 
-declare_id!("5Af8446iFooBfKv8KqTTqSwxRrZxEH7ZBzZqf2e1ohkM");
+declare_id!("9X5si3xhU4nFVh7FkGaC3n251xoN5JBoys9AEnrfkzxh");
 
 #[program]
 pub mod staking_on_solana {

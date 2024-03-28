@@ -335,6 +335,7 @@ describe("staking-on-solana", () => {
       .accounts({
         user: user1.publicKey,
         admin: admin.publicKey,
+        treasury: treasury.publicKey,
         poolConfigAccount: selected_pool.publicKey,
         poolStateAccount: selected_pool.account.stateAddr,
         platform: platform_info_pda,
@@ -347,7 +348,7 @@ describe("staking-on-solana", () => {
         treasuryStakeTokenVault: treasuryStakeTokenVault.address,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      // .signers([admin.payer])
+      .signers([admin.payer, user1])
       .rpc();
 
     // Check pool, user, creator stake amount after unstake
@@ -453,18 +454,20 @@ describe("staking-on-solana", () => {
       pool_state.rewardAmount.toString(),
       "pool reward account has correct"
     );
+
+    console.log("wait 5 seconds...")
+    await waitSeconds(5);
+    console.log("wait ended...")
   });
 
   it("compound rewards", async () => {
     const raydiumSwapParams = {
+      // ammProgram: new PublicKey('675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'),
+      ammProgram: new PublicKey('9rpQHSyFVM1dkkHFQ2TtTzPEW7DVmEyPmN8wVniqJtuC'), // devnet
       id: new PublicKey('rtbamRPBDBmuxYgKe2wthSAU1fL5zRWyHwFaoM7wLD4'),
       baseMint: new PublicKey('24WVen8yYhYw5oF3ywJRzfVkKhfdp4KaCAeQaQz4gT5m'),
       quoteMint: new PublicKey('So11111111111111111111111111111111111111112'),
       lpMint: new PublicKey('AKLwVGVRC7M98mtRUdRXuY9LWWM9yfmcQfwcxqjRYhDT'),
-      baseDecimals: 9,
-      quoteDecimals: 9,
-      lpDecimals: 9,
-      version: 4,
       programId: new PublicKey('HWy1jotHpo6UqeQxx49dpYYdQB8wj9Qk9MdxwjLvDHB8'),
       authority: new PublicKey('DbQqP6ehDYmeYjcBaMRuA8tAJY1EjDUz9DpwSLjaQqfC'),
       openOrders: new PublicKey('7KGNb6TaAabjQyJvdjgwmZVDo3oWZg1y3EXaZYv4ivqM'),
@@ -473,7 +476,6 @@ describe("staking-on-solana", () => {
       quoteVault: new PublicKey('7XBYrvwkckuRiv9v9a1XAecn7fJNd3dp32yRjaZZdka4'),
       withdrawQueue: new PublicKey('11111111111111111111111111111111'),
       lpVault: new PublicKey('11111111111111111111111111111111'),
-      marketVersion: 3,
       marketProgramId: new PublicKey('EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj'),
       marketId: new PublicKey('DkKp42dX39RD99rTQmigyEVi9MF4m6aBhd6t1inueW8T'),
       marketAuthority: new PublicKey('FG4Y8ibr2hXtiPT7GieNQ9MSw4Y24LsBzXaBryHkjhm'),
@@ -502,6 +504,7 @@ describe("staking-on-solana", () => {
       .accounts({
         user: user1.publicKey,
         admin: admin.publicKey,
+        treasury: treasury.publicKey,
         userInfo: userInfoPDA,
         poolConfigAccount: selected_pool.publicKey,
         poolStateAccount: selected_pool.account.stateAddr,
@@ -510,7 +513,7 @@ describe("staking-on-solana", () => {
         // treasuryStakeTokenVault: treasuryStakeTokenVault.address,
         tokenProgram: TOKEN_PROGRAM_ID,
         // raydium swap
-        // ammProgram: raydiumSwapParams.marketProgramId,
+        ammProgram: raydiumSwapParams.ammProgram,
         amm: raydiumSwapParams.id,
         ammAuthority: raydiumSwapParams.authority,
         ammOpenOrders: raydiumSwapParams.openOrders,
@@ -527,10 +530,10 @@ describe("staking-on-solana", () => {
         serumVaultSigner: raydiumSwapParams.marketAuthority,
         // userSourceTokenAccount: userCoinTokenAccount,
         // userDestinationTokenAccount: userPcTokenAccount,
-        userSourceOwner: provider.wallet.publicKey,
+        // userSourceOwner: provider.wallet.publicKey,
         splTokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([user1])
+      .signers([admin.payer])
       .rpc().catch(e => console.error(e));
 
   });
@@ -710,6 +713,7 @@ describe("staking-on-solana", () => {
       .accounts({
         staker: user.publicKey,
         admin: admin.publicKey,
+        treasury: treasury.publicKey,
         platform: platform_info_pda,
         userInfo: userInfoPDA,
         userStakeTokenVault: userStakeTokenVault.address,

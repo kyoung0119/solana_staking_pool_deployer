@@ -10,12 +10,12 @@ pub fn update_pool<'info>(
     pool_state: &mut Account<'info, PoolState>
 ) -> Result<()> {
     let clock = Clock::get()?;
-    msg!("@@update pool start");
-    msg!("@@current slot {}", clock.slot);
+    // msg!("@@update pool start");
+    // msg!("@@current slot {}", clock.slot);
     if clock.slot <= pool_state.last_reward_slot || pool_state.last_reward_slot == 0 {
         return Ok(());
     }
-    msg!("@@pool_state.total_staked {}", pool_state.total_staked);
+    // msg!("@@pool_state.total_staked {}", pool_state.total_staked);
     if pool_state.total_staked == 0 {
         pool_state.last_reward_slot = clock.slot;
         return Ok(());
@@ -25,20 +25,20 @@ pub fn update_pool<'info>(
     let reward = multiplier * pool_config.reward_per_slot;
     let precision_factor = get_precision_factor(pool_config);
 
-    msg!("@@multiplier {}", multiplier);
-    msg!("@@pool_config.reward_per_slot {}", pool_config.reward_per_slot);
-    msg!("@@reward {}", reward);
-    msg!("@@precision_factor {}", precision_factor);
+    // msg!("@@multiplier {}", multiplier);
+    // msg!("@@pool_config.reward_per_slot {}", pool_config.reward_per_slot);
+    // msg!("@@reward {}", reward);
+    // msg!("@@precision_factor {}", precision_factor);
 
     pool_state.acc_token_per_share += (reward * precision_factor) / pool_state.total_staked;
 
     pool_state.last_reward_slot = clock.slot;
     pool_state.should_total_paid += reward;
 
-    msg!("@@pool_state.acc_token_per_share {}", pool_state.acc_token_per_share);
-    msg!("@@pool_state.last_reward_slot {}", pool_state.last_reward_slot);
-    msg!("@@pool_state.should_total_paide {}", pool_state.should_total_paid);
-    msg!("@@update pool end");
+    // msg!("@@pool_state.acc_token_per_share {}", pool_state.acc_token_per_share);
+    // msg!("@@pool_state.last_reward_slot {}", pool_state.last_reward_slot);
+    // msg!("@@pool_state.should_total_paide {}", pool_state.should_total_paid);
+    // msg!("@@update pool end");
     Ok(())
 }
 

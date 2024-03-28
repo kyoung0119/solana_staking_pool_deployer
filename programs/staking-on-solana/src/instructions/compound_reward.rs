@@ -1,6 +1,7 @@
 use anchor_lang::{ prelude::*, solana_program };
 use anchor_spl::token::{ self, TokenAccount };
 use raydium_contract_instructions::amm_instruction;
+use amm_anchor::SwapBaseIn;
 
 use crate::state::*;
 use crate::utils::*;
@@ -52,10 +53,14 @@ pub fn handler(ctx: Context<CompoundReward>) -> Result<()> {
 
         // swap stake token to reward token
         if pool_config.stake_mint != pool_config.reward_mint {
-            pending = 0;
+            let pool_reward_balance_before = ctx.accounts.pool_reward_token_vault.amount;
+            msg!("pool_reward_balance_before {}", pool_reward_balance_before);
+
             let minimum_amount_out = 1;
+            /*
             let ix = amm_instruction::swap_base_in(
                 &amm_instruction::ID,
+                // ctx.program_id,
                 ctx.accounts.amm.key,
                 ctx.accounts.amm_authority.key,
                 ctx.accounts.amm_open_orders.key,
@@ -99,9 +104,49 @@ pub fn handler(ctx: Context<CompoundReward>) -> Result<()> {
                     ctx.accounts.user_source_owner.clone(),
                     ctx.accounts.spl_token_program.clone(),
                 ],
-                &[&[ctx.accounts.user.key.as_ref()]]
+                &(
+                    // &[&[ctx.accounts.user.key.as_ref()]],
+                    []
+                )
                 // ctx.bumps.
             )?;
+*/
+            let swap_base_in_accounts = SwapBaseIn {
+                amm: ctx.accounts.amm.clone(),
+                amm_authority: ctx.accounts.amm_authority.clone(),
+                amm_open_orders: ctx.accounts.amm_open_orders.clone(),
+                amm_target_orders: ctx.accounts.amm_target_orders.clone(),
+                pool_coin_token_account: ctx.accounts.pool_coin_token_account.clone(),
+                pool_pc_token_account: ctx.accounts.pool_pc_token_account.clone(),
+                serum_program: ctx.accounts.serum_program.clone(),
+                serum_market: ctx.accounts.serum_market.clone(),
+                serum_bids: ctx.accounts.serum_bids.clone(),
+                serum_asks: ctx.accounts.serum_asks.clone(),
+                serum_event_queue: ctx.accounts.serum_event_queue.clone(),
+                serum_coin_vault_account: ctx.accounts.serum_coin_vault_account.clone(),
+                serum_pc_vault_account: ctx.accounts.serum_pc_vault_account.clone(),
+                serum_vault_signer: ctx.accounts.serum_vault_signer.clone(),
+                user_source_token_account: ctx.accounts.pool_reward_token_vault
+                    .to_account_info()
+                    .clone(),
+                user_destination_token_account: ctx.accounts.pool_stake_token_vault
+                    .to_account_info()
+                    .clone(),
+                user_source_owner: ctx.accounts.admin.to_account_info().clone(),
+                spl_token_program: ctx.accounts.spl_token_program.clone(),
+            };
+
+            // Specify the program for the CPI call
+            let swap_base_in_program = ctx.accounts.amm_program.clone();
+
+            // Create a CpiContext with the specified accounts and program
+            let cpi_ctx = CpiContext::new(swap_base_in_program, swap_base_in_accounts);
+            let _ = amm_anchor::swap_base_in(cpi_ctx, pending, minimum_amount_out);
+
+            let pool_reward_balance_after = ctx.accounts.pool_reward_token_vault.amount;
+            msg!("pool_reward_balance_after {}", pool_reward_balance_after);
+
+            pending = pool_reward_balance_after - pool_reward_balance_before;
         }
 
         pool_state.total_staked += pending;
@@ -120,12 +165,13 @@ pub fn handler(ctx: Context<CompoundReward>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct CompoundReward<'info> {
+    /// CHECK:
     #[account(mut)]
-    pub user: Signer<'info>,
+    pub user: AccountInfo<'info>,
 
     /// CHECK:
     #[account(mut)]
-    pub admin: AccountInfo<'info>,
+    pub admin: Signer<'info>,
 
     #[account(mut)]
     pub user_info: Box<Account<'info, UserInfo>>,
@@ -144,11 +190,11 @@ pub struct CompoundReward<'info> {
     // #[account(mut)]
     // pub treasury_stake_token_vault: Box<Account<'info, TokenAccount>>,
 
-    // pub system_program: Program<'info, System>,
-
     pub token_program: Program<'info, token::Token>,
 
     // Raydium Swap Accounts
+    /// CHECK: Safe. amm program
+    pub amm_program: AccountInfo<'info>,
     /// CHECK: Safe. amm Account
     #[account(mut)]
     pub amm: AccountInfo<'info>,
@@ -189,15 +235,7 @@ pub struct CompoundReward<'info> {
     /// CHECK: Safe. vault_signer Account
     #[account(mut)]
     pub serum_vault_signer: AccountInfo<'info>,
-    /// CHECK: Safe. user source token Account. user Account to swap from.
-    // #[account(mut)]
-    // pub user_source_token_account: AccountInfo<'info>,
-    // /// CHECK: Safe. user destination token Account. user Account to swap to.
-    // #[account(mut)]
-    // pub user_destination_token_account: AccountInfo<'info>,
-    /// CHECK: Safe. user owner Account
-    #[account(signer)]
-    pub user_source_owner: AccountInfo<'info>,
+
     /// CHECK: Safe. The spl token program
     #[account(address = spl_token::ID)]
     pub spl_token_program: AccountInfo<'info>,

@@ -21,3 +21,4 @@ anchor-spl = "0.29.0"
 spl-token = "4.0.1"
 spl-associated-token-account = "2.3.1"
 raydium-contract-instructions = { path = "../../lib"}
+amm-anchor = {path = "../../amm-anchor"}

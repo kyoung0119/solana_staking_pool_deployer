@@ -2,7 +2,6 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{ self };
 
 use crate::state::*;
-use crate::utils::*;
 use crate::error::*;
 use crate::events::*;
 
@@ -12,7 +11,7 @@ pub fn handler(ctx: Context<StartReward>) -> Result<()> {
 
     require!(pool_config.start_slot == 0, BrewStakingError::PoolAlreadyStarted);
 
-    msg!("insufficient rewadrs {}", insufficient_rewards(pool_config, pool_state));
+    // msg!("insufficient rewadrs {}", insufficient_rewards(pool_config, pool_state));
     // require!(
     //     insufficient_rewards(pool_config, pool_state) == 0,
     //     BrewStakingError::RewardNotDeposited
@@ -25,9 +24,9 @@ pub fn handler(ctx: Context<StartReward>) -> Result<()> {
 
     pool_state.last_reward_slot = pool_config.start_slot;
 
-    msg!("current slot {}", clock.slot);
-    msg!("pool_config.start_slot {}", pool_config.start_slot);
-    msg!("pool_config.end_slot {}", pool_config.end_slot);
+    // msg!("current slot {}", clock.slot);
+    // msg!("pool_config.start_slot {}", pool_config.start_slot);
+    // msg!("pool_config.end_slot {}", pool_config.end_slot);
 
     emit!(NewStartAndEndSlots {
         start_slot: pool_config.start_slot,

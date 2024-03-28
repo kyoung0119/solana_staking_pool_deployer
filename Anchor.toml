@@ -1,3 +1,9 @@
+# [workspace]
+# members = [
+#     "programs/staking-on-solana",
+#     "lib"
+# ]
+
 [toolchain]
 
 [features]
@@ -5,16 +11,18 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-staking_on_solana = "5Af8446iFooBfKv8KqTTqSwxRrZxEH7ZBzZqf2e1ohkM"
+staking_on_solana = "9X5si3xhU4nFVh7FkGaC3n251xoN5JBoys9AEnrfkzxh"
 
 [programs.localnet]
-staking_on_solana = "5Af8446iFooBfKv8KqTTqSwxRrZxEH7ZBzZqf2e1ohkM"
+staking_on_solana = "9X5si3xhU4nFVh7FkGaC3n251xoN5JBoys9AEnrfkzxh"
+amm = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "localnet"
+# cluster = "https://proportionate-purple-snow.solana-devnet.quiknode.pro/5697002902222def8695762623210bcca30a6b7b/"
 wallet = "/home/letho/.config/solana/id.json"
 
 [scripts]

@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program;
 use anchor_spl::token::{ self, TokenAccount, Transfer };
 
 use crate::state::*;
@@ -10,9 +11,22 @@ pub fn handler(ctx: Context<Unstake>, unstake_amount: u64) -> Result<()> {
     let pool_config = &ctx.accounts.pool_config_account;
     let pool_state = &mut ctx.accounts.pool_state_account;
     let user_info = &mut ctx.accounts.user_info;
+    let platform = &ctx.accounts.platform;
 
     require!(unstake_amount > 0, BrewStakingError::UnstakeAmountTooSmall);
     require!(user_info.staked_amount > unstake_amount, BrewStakingError::UnstakeAmountTooHigh);
+
+    // Transfer Performance Fee from user to treasury
+    let user_balance = ctx.accounts.user.to_account_info().lamports();
+    require!(user_balance > platform.performance_fee, BrewStakingError::InsufficientDeployFee);
+
+    let cpi_program = ctx.accounts.system_program.to_account_info();
+    let cpi_accounts = system_program::Transfer {
+        from: ctx.accounts.user.to_account_info(),
+        to: ctx.accounts.treasury.to_account_info(),
+    };
+    let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+    system_program::transfer(cpi_ctx, platform.performance_fee)?;
 
     let _ = update_pool(pool_config, pool_state);
 
@@ -60,7 +74,7 @@ pub fn handler(ctx: Context<Unstake>, unstake_amount: u64) -> Result<()> {
     if user_info.staked_amount < unstake_amount {
         real_amount = user_info.staked_amount;
     }
-    // Transfer unstake fee from pool to treasury
+    // Transfer unstake fee from pool to pool owner
     let unstake_fee = (real_amount * (pool_config.unstake_fee as u64)) / PERCENT_PRECISION;
 
     let cpi_accounts = Transfer {
@@ -96,10 +110,13 @@ pub fn handler(ctx: Context<Unstake>, unstake_amount: u64) -> Result<()> {
 pub struct Unstake<'info> {
     /// CHECK:
     #[account(mut)]
-    pub user: AccountInfo<'info>,
+    pub user: Signer<'info>,
     /// CHECK:
     #[account(mut)]
     pub admin: Signer<'info>,
+    /// CHECK:
+    #[account(mut)]
+    pub treasury: AccountInfo<'info>,
 
     pub pool_config_account: Account<'info, PoolConfig>,
 

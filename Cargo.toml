@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "programs/*",
+    "amm-anchor",
     "lib"
 ]
 
