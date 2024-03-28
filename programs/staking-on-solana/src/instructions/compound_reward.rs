@@ -1,6 +1,7 @@
-use anchor_lang::{ prelude::*, solana_program };
+use anchor_lang::prelude::*;
+use anchor_lang::system_program;
 use anchor_spl::token::{ self, TokenAccount };
-use raydium_contract_instructions::amm_instruction;
+// use raydium_contract_instructions::amm_instruction;
 use amm_anchor::SwapBaseIn;
 
 use crate::state::*;
@@ -12,12 +13,19 @@ pub fn handler(ctx: Context<CompoundReward>) -> Result<()> {
     let pool_config = &mut ctx.accounts.pool_config_account;
     let pool_state = &mut ctx.accounts.pool_state_account;
     let user_info = &mut ctx.accounts.user_info;
+    let platform = &ctx.accounts.platform;
 
-    let clock = Clock::get()?;
+    // Transfer Performance Fee from user to treasury
+    let user_balance = ctx.accounts.user.to_account_info().lamports();
+    require!(user_balance > platform.performance_fee, BrewStakingError::InsufficientDeployFee);
 
-    msg!("current slot {}", clock.slot);
-    msg!("pool_config.start_slot {}", pool_config.start_slot);
-    msg!("pool_config.end_slot {}", pool_config.end_slot);
+    let cpi_program = ctx.accounts.system_program.to_account_info();
+    let cpi_accounts = system_program::Transfer {
+        from: ctx.accounts.user.to_account_info(),
+        to: ctx.accounts.treasury.to_account_info(),
+    };
+    let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+    system_program::transfer(cpi_ctx, platform.performance_fee)?;
 
     let _ = update_pool(pool_config, pool_state);
 
@@ -167,19 +175,25 @@ pub fn handler(ctx: Context<CompoundReward>) -> Result<()> {
 pub struct CompoundReward<'info> {
     /// CHECK:
     #[account(mut)]
-    pub user: AccountInfo<'info>,
+    pub user: Signer<'info>,
 
     /// CHECK:
     #[account(mut)]
     pub admin: Signer<'info>,
 
+    /// CHECK:
     #[account(mut)]
-    pub user_info: Box<Account<'info, UserInfo>>,
+    pub treasury: AccountInfo<'info>,
 
     pub pool_config_account: Box<Account<'info, PoolConfig>>,
 
     #[account(mut)]
     pub pool_state_account: Box<Account<'info, PoolState>>,
+
+    #[account(mut)]
+    pub user_info: Box<Account<'info, UserInfo>>,
+
+    pub platform: Account<'info, PlatformInfo>,
 
     #[account(mut)]
     pub pool_stake_token_vault: Box<Account<'info, TokenAccount>>,
@@ -239,4 +253,6 @@ pub struct CompoundReward<'info> {
     /// CHECK: Safe. The spl token program
     #[account(address = spl_token::ID)]
     pub spl_token_program: AccountInfo<'info>,
+
+    pub system_program: Program<'info, System>,
 }

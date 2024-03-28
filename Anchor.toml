@@ -1,6 +1,7 @@
 # [workspace]
 # members = [
 #     "programs/staking-on-solana",
+#     "amm-anchor",
 #     "lib"
 # ]
 

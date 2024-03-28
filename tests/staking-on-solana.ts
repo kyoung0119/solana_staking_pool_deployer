@@ -425,19 +425,27 @@ describe("staking-on-solana", () => {
     let poolRewardInfo = await provider.connection.getTokenAccountBalance(selected_pool.account.poolRewardTokenVault);
     console.log("pool reward before claim: ", poolRewardInfo.value.amount)
 
+    // Fetch the PDA of platform info account
+    const [platform_info_pda] = await PublicKey.findProgramAddressSync(
+      [treasury.publicKey.toBuffer()],
+      program.programId
+    );
+
     await program.methods
       .claimReward()
       .accounts({
         claimer: user1.publicKey,
         admin: admin.publicKey,
-        userRewardTokenVault: userRewardTokenVault.address,
-        poolRewardTokenVault: selected_pool.account.poolRewardTokenVault,
+        treasury: treasury.publicKey,
         userInfo: userInfoPDA,
         poolConfigAccount: selected_pool.publicKey,
         poolStateAccount: selected_pool.account.stateAddr,
+        platform: platform_info_pda,
+        userRewardTokenVault: userRewardTokenVault.address,
+        poolRewardTokenVault: selected_pool.account.poolRewardTokenVault,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      // .signers([admin.payer])
+      .signers([admin.payer, user1])
       .rpc();
 
 
@@ -499,15 +507,22 @@ describe("staking-on-solana", () => {
       program.programId
     );
 
+    // Fetch the PDA of platform info account
+    const [platform_info_pda] = await PublicKey.findProgramAddressSync(
+      [treasury.publicKey.toBuffer()],
+      program.programId
+    );
+
     await program.methods
       .compoundReward()
       .accounts({
         user: user1.publicKey,
         admin: admin.publicKey,
         treasury: treasury.publicKey,
-        userInfo: userInfoPDA,
         poolConfigAccount: selected_pool.publicKey,
         poolStateAccount: selected_pool.account.stateAddr,
+        userInfo: userInfoPDA,
+        platform: platform_info_pda,
         poolStakeTokenVault: selected_pool.account.poolStakeTokenVault,
         poolRewardTokenVault: selected_pool.account.poolRewardTokenVault,
         // treasuryStakeTokenVault: treasuryStakeTokenVault.address,
@@ -533,7 +548,7 @@ describe("staking-on-solana", () => {
         // userSourceOwner: provider.wallet.publicKey,
         splTokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([admin.payer])
+      .signers([admin.payer, user1])
       .rpc().catch(e => console.error(e));
 
   });

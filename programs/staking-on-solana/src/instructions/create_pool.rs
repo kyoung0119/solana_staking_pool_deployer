@@ -15,6 +15,7 @@ pub fn handler(
     reward_per_slot: u64,
     duration: u16
 ) -> Result<()> {
+    // Validate stake and unstake fees
     require!(stake_fee <= MAX_FEE, BrewStakingError::InvalidStakeFee);
     require!(unstake_fee <= MAX_FEE, BrewStakingError::InvalidUnstakeFee);
 
