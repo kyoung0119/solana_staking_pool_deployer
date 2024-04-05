@@ -24,7 +24,6 @@ pub mod staking_on_solana {
 
     pub fn create_pool(
         ctx: Context<CreatePool>,
-        pool_id: String,
         stake_fee: u16,
         unstake_fee: u16,
         initial_funding: u64,
@@ -33,7 +32,6 @@ pub mod staking_on_solana {
     ) -> Result<()> {
         instructions::create_pool::handler(
             ctx,
-            pool_id,
             stake_fee,
             unstake_fee,
             initial_funding,

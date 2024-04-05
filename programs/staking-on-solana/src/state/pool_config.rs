@@ -3,7 +3,6 @@ use anchor_lang::prelude::*;
 #[account]
 pub struct PoolConfig {
     pub owner: Pubkey,
-    pub pool_id: String,
     pub duration: u16,
     pub start_slot: u64,
     pub end_slot: u64,
@@ -19,5 +18,4 @@ pub struct PoolConfig {
     pub state_addr: Pubkey,
 }
 
-pub const POOL_CONFIG_SIZE: usize =
-    8 + 32 + (4 + 2) + 2 + 8 + 8 + 8 + 2 + 2 + 32 + 32 + 1 + 1 + 32 + 32 + 32;
+pub const POOL_CONFIG_SIZE: usize = 8 + 32 + 2 + 8 + 8 + 8 + 2 + 2 + 32 + 32 + 1 + 1 + 32 + 32 + 32;

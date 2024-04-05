@@ -8,7 +8,6 @@ use crate::error::*;
 
 pub fn handler(
     ctx: Context<CreatePool>,
-    pool_id: String,
     stake_fee: u16,
     unstake_fee: u16,
     initial_funding: u64,
@@ -23,7 +22,6 @@ pub fn handler(
     let platform = &ctx.accounts.platform;
 
     pool_config.owner = ctx.accounts.creator.key();
-    pool_config.pool_id = pool_id;
     pool_config.stake_fee = stake_fee;
     pool_config.unstake_fee = unstake_fee;
     pool_config.duration = duration;
@@ -73,15 +71,15 @@ pub fn handler(
 }
 
 #[derive(Accounts)]
-#[instruction(pool_id: String)]
+// #[instruction(pool_id: String)]
 pub struct CreatePool<'info> {
     #[account(
         // init_if_needed,
         init,
         payer = creator,
-        space = POOL_CONFIG_SIZE,
-        seeds = [pool_id.as_bytes().as_ref(), creator.key().as_ref()],
-        bump
+        space = POOL_CONFIG_SIZE
+        // seeds = [pool_id.as_bytes().as_ref(), creator.key().as_ref()],
+        // bump
     )]
     pub pool_config_account: Box<Account<'info, PoolConfig>>,
 

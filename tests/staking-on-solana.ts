@@ -104,10 +104,10 @@ describe("staking-on-solana", () => {
     const res = await init_pool(deployer1, duration, stakeFee, unstakeFee, initialFunding, rewardPerSlot, stakeMintDecimals, rewardMintDecimals);
 
     // Fetch the pool config account and log results
-    const pool_config = await program.account.poolConfig.fetch(res.POOL_CONFIG_PDA);
+    // const pool_config = await program.account.poolConfig.fetch(res.POOL_CONFIG_PDA);
+    const pool_config = await program.account.poolConfig.fetch(res.poolConfigAccountAddress);
 
     console.log(`pool owner: `, pool_config.owner.toString());
-    console.log(`pool id: `, pool_config.poolId);
     console.log(`pool stateAddr: `, pool_config.stateAddr);
     console.log(`pool stakeFee: `, pool_config.stakeFee);
     console.log(`pool unstakeFee: `, pool_config.unstakeFee);
@@ -160,7 +160,6 @@ describe("staking-on-solana", () => {
     pools.forEach((pool, index) => {
       console.log(`pool pda: `, pool.publicKey.toString());
       console.log(`pool owner: `, pool.account.owner.toString());
-      console.log(`pool id: `, pool.account.poolId);
     });
   });
 
@@ -595,12 +594,12 @@ describe("staking-on-solana", () => {
       admin.publicKey
     );
 
-    const poolId = "0"
     // Fetch the PDA of pool config account
-    const [POOL_CONFIG_PDA] = await PublicKey.findProgramAddressSync(
-      [Buffer.from(poolId), deployer.publicKey.toBuffer()],
-      program.programId
-    );
+    // const [POOL_CONFIG_PDA] = await PublicKey.findProgramAddressSync(
+    //   [Buffer.from(poolId), deployer.publicKey.toBuffer()],
+    //   program.programId
+    // );
+    const poolConfigAccount = Keypair.generate();
 
     // const [poolStakeTokenVault] = await PublicKey.findProgramAddressSync(
     //   [POOL_CONFIG_PDA.toBuffer(), stakeMint.toBuffer()],
@@ -623,7 +622,6 @@ describe("staking-on-solana", () => {
 
     const tx = await program.methods
       .createPool(
-        poolId,
         stakeFee,
         unstakeFee,
         fundingAmount,
@@ -631,7 +629,8 @@ describe("staking-on-solana", () => {
         duration
       )
       .accounts({
-        poolConfigAccount: POOL_CONFIG_PDA,
+        // poolConfigAccount: POOL_CONFIG_PDA,
+        poolConfigAccount: poolConfigAccount.publicKey,
         poolStateAccount: poolStateAccount.publicKey,
         platform: platform_info_pda,
         creator: deployer.publicKey,
@@ -646,13 +645,14 @@ describe("staking-on-solana", () => {
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([deployer, poolStateAccount])
+      .signers([deployer, poolConfigAccount, poolStateAccount])
       .rpc().catch(e => console.error(e));
 
     console.log(`Pool Init Transaction: https://explorer.solana.com/tx/${tx}?cluster=devnet`);
 
     return {
-      POOL_CONFIG_PDA,
+      // POOL_CONFIG_PDA,
+      poolConfigAccountAddress: poolConfigAccount.publicKey,
       stakeMint,
       rewardMint,
       creatorRewardTokenVault,
