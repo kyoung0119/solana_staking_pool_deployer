@@ -93,8 +93,9 @@ pub struct CreatePool<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
 
+    /// CHECK:
     #[account(mut)]
-    pub treasury: Signer<'info>,
+    pub treasury: AccountInfo<'info>,
 
     pub stake_mint: Box<Account<'info, Mint>>,
 
@@ -122,7 +123,11 @@ pub struct CreatePool<'info> {
     #[account(mut)]
     pub pool_reward_token_vault: Box<Account<'info, TokenAccount>>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        token::authority = creator.key,
+        // constraint = &creator_reward_token_vault.owner == creator.key
+    )]
     pub creator_reward_token_vault: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,

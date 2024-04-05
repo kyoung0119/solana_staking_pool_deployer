@@ -185,6 +185,7 @@ pub struct CompoundReward<'info> {
     #[account(mut)]
     pub treasury: AccountInfo<'info>,
 
+    #[account(has_one = pool_stake_token_vault, has_one = pool_reward_token_vault)]
     pub pool_config_account: Box<Account<'info, PoolConfig>>,
 
     #[account(mut)]

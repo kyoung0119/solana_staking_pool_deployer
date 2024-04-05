@@ -646,7 +646,7 @@ describe("staking-on-solana", () => {
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([deployer, treasury, poolStateAccount])
+      .signers([deployer, poolStateAccount])
       .rpc().catch(e => console.error(e));
 
     console.log(`Pool Init Transaction: https://explorer.solana.com/tx/${tx}?cluster=devnet`);

@@ -91,6 +91,7 @@ pub struct ClaimReward<'info> {
     #[account(mut)]
     pub user_info: Account<'info, UserInfo>,
 
+    #[account(has_one = pool_reward_token_vault)]
     pub pool_config_account: Account<'info, PoolConfig>,
 
     #[account(mut)]

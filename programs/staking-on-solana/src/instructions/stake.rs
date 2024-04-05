@@ -152,7 +152,7 @@ pub struct Stake<'info> {
 
     pub platform: Account<'info, PlatformInfo>,
 
-    #[account(mut)]
+    #[account(mut, has_one = pool_stake_token_vault)]
     pub pool_config_account: Account<'info, PoolConfig>,
 
     #[account(mut)]
