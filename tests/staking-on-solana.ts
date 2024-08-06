@@ -3,6 +3,7 @@ import {
   AnchorProvider,
   getProvider,
   setProvider,
+  Wallet,
   BN,
   Program,
 } from "@coral-xyz/anchor";
